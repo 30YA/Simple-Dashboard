@@ -10,7 +10,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const { token } = useAuthStore.getState();
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = `Basic ${token}`;
   }
 
   return config;
@@ -21,7 +21,6 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       const { clearAuth } = useAuthStore.getState();
-
       clearAuth();
       globalThis.location.href = "/login";
     }

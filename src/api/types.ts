@@ -3,13 +3,6 @@ export type LoginPayload = {
   password: string;
 };
 
-export type RegisterPayload = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  password: string;
-};
-
 export type LoginAndRegisterResponse = {
   token: string;
 };
@@ -20,8 +13,8 @@ export type AuthResponse = {
 };
 
 export type UserProfile = {
-  id?: string;
   username: string;
-  firstName: string;
-  lastName: string;
+  avatar: string;
+  first_name: string;
+  last_name: string;
 };

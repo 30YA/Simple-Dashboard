@@ -28,10 +28,10 @@ export default function LoginPage() {
     login(values, {
       onSuccess: (res) => {
         setAuth(res.token, {
-          firstName: "test",
-          lastName: "test2",
+          first_name: "test",
+          last_name: "test2",
           username: "test.test",
-          id: "0",
+          avatar: "",
         });
         navigate("/dashboard", { replace: true });
       },

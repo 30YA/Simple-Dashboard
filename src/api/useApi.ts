@@ -2,11 +2,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   LoginAndRegisterResponse,
   LoginPayload,
-  RegisterPayload,
   UserProfile,
 } from "./types";
 import { fetchProfile, loginRequest, registerRequest } from "./api";
 import type { AxiosError } from "axios";
+import { useAuthStore } from "../store/auth";
 
 export function useLoginMutation() {
   return useMutation<LoginAndRegisterResponse, AxiosError, LoginPayload>({
@@ -15,15 +15,16 @@ export function useLoginMutation() {
 }
 
 export function useRegisterMutation() {
-  return useMutation<LoginAndRegisterResponse, AxiosError, RegisterPayload>({
-    mutationFn: (payload: RegisterPayload) => registerRequest(payload),
+  return useMutation<LoginAndRegisterResponse, AxiosError, FormData>({
+    mutationFn: (payload: FormData) => registerRequest(payload),
   });
 }
 
-export function useProfileQuery(token?: string | null) {
+export function useProfileQuery() {
+  const token = useAuthStore((state) => state.token);
   return useQuery<UserProfile>({
     queryKey: ["profile", token],
-    queryFn: () => fetchProfile(token!),
+    queryFn: () => fetchProfile(token),
     enabled: Boolean(token),
     staleTime: 1000 * 60 * 5,
     retry: 1,

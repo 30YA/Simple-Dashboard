@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../api/useApi";
@@ -19,6 +19,23 @@ export default function RegisterPage() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const {
     register: formRegister,
     handleSubmit,
@@ -36,28 +53,31 @@ export default function RegisterPage() {
 
   async function onSubmit(values: RegisterFormValues) {
     setServerError(null);
-    register(
-      {
-        firstName: values.firstName,
-        lastName: values.lastName,
-        username: values.username,
-        password: values.password,
+
+    const formData = new FormData();
+    formData.append("first_name", values.firstName);
+    formData.append("last_name", values.lastName);
+    formData.append("username", values.username);
+    formData.append("password", values.password);
+    formData.append("confirm_password", values.confirmPassword);
+    if (selectedFile) {
+      formData.append("avatar", selectedFile);
+    }
+
+    register(formData, {
+      onSuccess: (res) => {
+        setAuth(res.token, {
+          first_name: "test",
+          last_name: "test2",
+          username: "test.test",
+          avatar: "",
+        });
+        navigate("/dashboard", { replace: true });
       },
-      {
-        onSuccess: (res) => {
-          setAuth(res.token, {
-            firstName: "test",
-            lastName: "test2",
-            username: "test.test",
-            id: "0",
-          });
-          navigate("/dashboard", { replace: true });
-        },
-        onError: (e) => {
-          setServerError(e.message);
-        },
-      }
-    );
+      onError: (e) => {
+        setServerError(e.message);
+      },
+    });
   }
 
   return (
@@ -82,8 +102,21 @@ export default function RegisterPage() {
 
         <form className="mt-6 space-y-5" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex justify-between items-center px-4 py-3 rounded-xl border border-slate-200">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept="image/*"
+            />
             <div className="flex gap-3 items-center">
-              <img alt="profile-icon" src="/profile-icon.svg" />
+              <img
+                alt="profile-icon"
+                src={previewUrl || "/profile-icon.svg"}
+                className={
+                  previewUrl ? "object-cover w-10 h-10 rounded-full" : ""
+                }
+              />
               <div>
                 <p className="text-sm font-semibold text-slate-900">Upload</p>
                 <p className="text-xs text-slate-500">Optional profile photo</p>
@@ -94,8 +127,9 @@ export default function RegisterPage() {
               variant="outline"
               size="sm"
               className="rounded-lg"
+              onClick={handleUploadClick}
             >
-              Upload +
+              {selectedFile ? "Change" : "Upload +"}
             </Button>
           </div>
 

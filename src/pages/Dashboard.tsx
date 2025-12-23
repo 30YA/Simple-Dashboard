@@ -1,16 +1,15 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/auth";
 import { Button } from "../components/ui/Button";
+import { useProfileQuery } from "../api/useApi";
 
 export default function DashboardPage() {
   const { clearAuth } = useAuthStore();
   const navigate = useNavigate();
   const [showLogout, setShowLogout] = useState(false);
 
-  const fullName = useMemo(() => {
-    return `first-name last-name`.trim();
-  }, []);
+  const { data: profile } = useProfileQuery();
 
   function handleLogout() {
     clearAuth();
@@ -24,9 +23,11 @@ export default function DashboardPage() {
           <img alt="profile-logo" src="/profile-logo.png" />
           <div className="text-center">
             <p className="text-sm font-semibold text-slate-900">
-              {fullName || "User"}
+              {profile?.first_name + " " + profile?.last_name || "User"}
             </p>
-            <p className="text-xs text-slate-500">@{"user name"}</p>
+            <p className="text-xs text-slate-500">
+              @{profile?.username || "user name"}
+            </p>
           </div>
         </div>
 

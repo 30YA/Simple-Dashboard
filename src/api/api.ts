@@ -2,7 +2,6 @@ import api from "./instance";
 import type {
   LoginAndRegisterResponse,
   LoginPayload,
-  RegisterPayload,
   UserProfile,
 } from "./types";
 
@@ -16,16 +15,20 @@ export const loginRequest = async (
 };
 
 export const registerRequest = async (
-  payload: RegisterPayload
+  payload: FormData
 ): Promise<LoginAndRegisterResponse> => {
-  const { data } = await api.post("/api/staff/register/", payload);
+  const { data } = await api.post("/api/staff/register/", payload, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return data;
 };
 
-export const fetchProfile = async (token: string) => {
+export const fetchProfile = async (token: string | null) => {
   const { data } = await api.get<UserProfile>("/api/staff/current_user/", {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Basic ${token}`,
     },
   });
   return data;
